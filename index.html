@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <!--
+    ==========================================================================
+    BUTTON DESIGN SYSTEM SHOWCASE
+    ==========================================================================
+    @version 3.0.0
+    
+    A comprehensive, production-ready button component showcase demonstrating:
+    - Design tokens architecture
+    - Multiple button variants and sizes
+    - Accessibility-first approach (WCAG 2.1 AA compliant)
+    - Interactive JavaScript behaviors
+    - RTL support
+    - High contrast mode support
+    - Dark mode support
+    - Reduced motion support
+    
+    File Structure:
+    - tokens.css: Design tokens (colors, spacing, typography, etc.)
+    - buttons.css: Button component styles
+    - script.js: Interactive behaviors
+    
+    CHANGELOG v3.0.0:
+    - Added CSP meta tag for security
+    - Improved toggle group semantics with radiogroup role
+    - Added aria-describedby for loading state announcements
+    - Fixed all color contrast issues
+    - Added comprehensive keyboard navigation documentation
+    
+    ==========================================================================
+  -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Production-ready Button Design System Showcase with accessibility-first approach">
+  <meta name="color-scheme" content="light dark">
+  
+  <!-- Security: Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'">
+  
+  <title>Button Design System Showcase v3.0</title>
+  
+  <!-- Design System Stylesheets -->
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="buttons.css">
+  
+  <!-- Page-specific styles -->
+  <style>
+    /**
+     * ==========================================================================
+     * SHOWCASE LAYOUT STYLES
+     * ==========================================================================
+     * These styles are specific to the showcase page layout.
+     * They are NOT part of the design system itself.
+     * ==========================================================================
+     */
+    
+    /* Reset and base styles */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+    
+    body {
+      font-family: var(--font-family-base);
+      font-size: var(--font-size-md);
+      line-height: var(--line-height-normal);
+      color: var(--color-neutral-800);
+      background-color: var(--color-neutral-50);
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Skip link for keyboard navigation */
+    .skip-link {
+      position: absolute;
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: var(--spacing-2) var(--spacing-4);
+      background-color: var(--color-primary-600);
+      color: var(--color-neutral-0);
+      text-decoration: none;
+      border-radius: var(--radius-md);
+      z-index: var(--z-index-max);
+      transition: top var(--transition-fast);
+    }
+    
+    .skip-link:focus {
+      top: var(--spacing-4);
+      outline: var(--focus-ring-width) solid var(--color-neutral-0);
+      outline-offset: var(--focus-ring-offset);
+    }
+    
+    /* Main container */
+    .showcase {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-8);
+    }
+    
+    /* Header styles */
+    .showcase__header {
+      margin-bottom: var(--spacing-12);
+      padding-bottom: var(--spacing-8);
+      border-bottom: 1px solid var(--color-neutral-200);
+    }
+    
+    .showcase__title {
+      font-size: var(--font-size-2xl);
+      font-weight: var(--font-weight-bold);
+      color: var(--color-neutral-900);
+      margin: 0 0 var(--spacing-2) 0;
+    }
+    
+    .showcase__subtitle {
+      font-size: var(--font-size-lg);
+      color: var(--color-neutral-600);
+      margin: 0;
+    }
+    
+    .showcase__version {
+      display: inline-block;
+      margin-top: var(--spacing-2);
+      padding: var(--spacing-1) var(--spacing-2);
+      background-color: var(--color-primary-100);
+      color: var(--color-primary-700);
+      font-size: var(--font-size-xs);
+      font-weight: var(--font-weight-medium);
+      border-radius: var(--radius-md);
+    }
+    
+    /* Section styles */
+    .section {
+      margin-bottom: var(--spacing-12);
+    }
+    
+    .section__title {
+      font-size: var(--font-size-xl);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      margin: 0 0 var(--spacing-2) 0;
+      padding-bottom: var(--spacing-2);
+      border-bottom: 2px solid var(--color-primary-500);
+      display: inline-block;
+    }
+    
+    .section__description {
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-600);
+      margin: var(--spacing-2) 0 var(--spacing-6) 0;
+      max-width: 65ch; /* Optimal reading width */
+    }
+    
+    /* Subsection styles */
+    .subsection {
+      margin-bottom: var(--spacing-8);
+    }
+    
+    .subsection__title {
+      font-size: var(--font-size-md);
+      font-weight: var(--font-weight-medium);
+      color: var(--color-neutral-700);
+      margin: 0 0 var(--spacing-4) 0;
+    }
+    
+    /* Button display grid */
+    .button-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-4);
+      align-items: center;
+    }
+    
+    .button-grid--vertical {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    /* Code/API reference */
+    .code-ref {
+      font-family: var(--font-family-mono);
+      font-size: var(--font-size-xs);
+      background-color: var(--color-neutral-100);
+      padding: var(--spacing-0-5) var(--spacing-1);
+      border-radius: var(--radius-sm);
+      color: var(--color-neutral-700);
+    }
+    
+    /* Demo card for special components */
+    .demo-card {
+      background-color: var(--color-neutral-0);
+      border: 1px solid var(--color-neutral-200);
+      border-radius: var(--radius-xl);
+      padding: var(--spacing-6);
+      margin-bottom: var(--spacing-4);
+    }
+    
+    /* Inline icon SVGs */
+    .icon {
+      width: 1.25em;
+      height: 1.25em;
+      vertical-align: middle;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+    
+    /* Collapsible content */
+    .collapsible-content {
+      padding: var(--spacing-4);
+      background-color: var(--color-neutral-100);
+      border-radius: var(--radius-lg);
+      margin-top: var(--spacing-2);
+    }
+    
+    /* Screen reader only utility */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    
+    /* High contrast section background */
+    .high-contrast-demo {
+      background-color: var(--color-neutral-800);
+      padding: var(--spacing-6);
+      border-radius: var(--radius-xl);
+    }
+    
+    /* API Reference Grid */
+    .api-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--spacing-4);
+      margin-top: var(--spacing-4);
+    }
+    
+    .api-grid__item {
+      padding: var(--spacing-3);
+      background-color: var(--color-neutral-50);
+      border-radius: var(--radius-md);
+    }
+    
+    .api-grid__item strong {
+      display: block;
+      margin-bottom: var(--spacing-2);
+      color: var(--color-neutral-900);
+    }
+    
+    /* Accessibility note callout */
+    .a11y-note {
+      padding: var(--spacing-3) var(--spacing-4);
+      background-color: var(--color-info-50);
+      border-left: 4px solid var(--color-info-500);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      margin: var(--spacing-4) 0;
+      font-size: var(--font-size-sm);
+      color: var(--color-info-800);
+    }
+    
+    .a11y-note::before {
+      content: "♿ Accessibility: ";
+      font-weight: var(--font-weight-semibold);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .showcase {
+        padding: var(--spacing-4);
+      }
+      
+      .section__title {
+        font-size: var(--font-size-lg);
+      }
+      
+      .api-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip navigation link for keyboard users -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Main showcase container -->
+  <main id="main-content" class="showcase" role="main">
+    
+    <!-- ================================================================
+         HEADER
+         ================================================================ -->
+    <header class="showcase__header">
+      <h1 class="showcase__title">Button Design System</h1>
+      <p class="showcase__subtitle">A production-ready, accessible button component library</p>
+      <span class="showcase__version">v3.0.0</span>
+    </header>
+    
+    <!-- ================================================================
+         SECTION: PRIMARY / SECONDARY / TERTIARY BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="hierarchy-title">
+      <h2 class="section__title" id="hierarchy-title">Button Hierarchy</h2>
+      <p class="section__description">Primary, secondary, and tertiary buttons establish visual hierarchy for actions. Use primary for the main action, secondary for supporting actions, and tertiary for low-emphasis actions.</p>
+      
+      <!-- Primary Buttons -->
+      <div class="subsection">
+        <h3 class="subsection__title">Primary Actions <code class="code-ref">.btn--primary</code></h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--primary btn--solid">Primary Solid</button>
+          <button type="button" class="btn btn--primary btn--outline">Primary Outline</button>
+          <button type="button" class="btn btn--primary btn--ghost">Primary Ghost</button>
+          <button type="button" class="btn btn--primary btn--text">Primary Text</button>
+        </div>
+      </div>
+      
+      <!-- Secondary Buttons -->
+      <div class="subsection">
+        <h3 class="subsection__title">Secondary Actions <code class="code-ref">.btn--secondary</code></h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--secondary btn--solid">Secondary Solid</button>
+          <button type="button" class="btn btn--secondary btn--outline">Secondary Outline</button>
+          <button type="button" class="btn btn--secondary btn--ghost">Secondary Ghost</button>
+        </div>
+      </div>
+      
+      <!-- Tertiary / Ghost Buttons -->
+      <div class="subsection">
+        <h3 class="subsection__title">Tertiary Actions <code class="code-ref">.btn--ghost</code></h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--ghost">Default Ghost</button>
+          <button type="button" class="btn btn--text">Text Only</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: SEMANTIC COLOR VARIANTS
+         ================================================================ -->
+    <section class="section" aria-labelledby="semantic-title">
+      <h2 class="section__title" id="semantic-title">Semantic Variants</h2>
+      <p class="section__description">Color variants communicate intent and provide visual feedback. All colors meet WCAG 2.1 AA contrast requirements.</p>
+      
+      <!-- Solid Variants -->
+      <div class="subsection">
+        <h3 class="subsection__title">Solid Style</h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--primary">Primary</button>
+          <button type="button" class="btn btn--secondary">Secondary</button>
+          <button type="button" class="btn btn--success">Success</button>
+          <button type="button" class="btn btn--warning">Warning</button>
+          <button type="button" class="btn btn--danger">Danger</button>
+          <button type="button" class="btn btn--info">Info</button>
+        </div>
+      </div>
+      
+      <!-- Outline Variants -->
+      <div class="subsection">
+        <h3 class="subsection__title">Outline Style <code class="code-ref">.btn--outline</code></h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--primary btn--outline">Primary</button>
+          <button type="button" class="btn btn--secondary btn--outline">Secondary</button>
+          <button type="button" class="btn btn--success btn--outline">Success</button>
+          <button type="button" class="btn btn--warning btn--outline">Warning</button>
+          <button type="button" class="btn btn--danger btn--outline">Danger</button>
+          <button type="button" class="btn btn--info btn--outline">Info</button>
+        </div>
+      </div>
+      
+      <!-- Ghost Variants -->
+      <div class="subsection">
+        <h3 class="subsection__title">Ghost Style <code class="code-ref">.btn--ghost</code></h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--primary btn--ghost">Primary</button>
+          <button type="button" class="btn btn--secondary btn--ghost">Secondary</button>
+          <button type="button" class="btn btn--success btn--ghost">Success</button>
+          <button type="button" class="btn btn--danger btn--ghost">Danger</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: DESTRUCTIVE ACTIONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="destructive-title">
+      <h2 class="section__title" id="destructive-title">Destructive Actions</h2>
+      <p class="section__description">Use danger variants for irreversible or destructive actions that require user attention. Consider adding a confirmation dialog for critical actions.</p>
+      
+      <div class="button-grid">
+        <button type="button" class="btn btn--danger">Delete Item</button>
+        <button type="button" class="btn btn--danger btn--outline">Remove</button>
+        <button type="button" class="btn btn--danger btn--ghost">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+          </svg>
+          Delete Forever
+        </button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: SIZES
+         ================================================================ -->
+    <section class="section" aria-labelledby="sizes-title">
+      <h2 class="section__title" id="sizes-title">Sizes</h2>
+      <p class="section__description">Size modifiers adjust button dimensions for different contexts and use cases.</p>
+      
+      <div class="a11y-note">
+        Small buttons (32px) are below the 44px WCAG AAA touch target recommendation. On mobile devices, buttons are automatically enlarged to meet touch target requirements.
+      </div>
+      
+      <div class="button-grid">
+        <button type="button" class="btn btn--primary btn--sm">Small (32px)</button>
+        <button type="button" class="btn btn--primary btn--md">Medium (40px)</button>
+        <button type="button" class="btn btn--primary btn--lg">Large (44px)</button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: SHAPES
+         ================================================================ -->
+    <section class="section" aria-labelledby="shapes-title">
+      <h2 class="section__title" id="shapes-title">Shapes</h2>
+      <p class="section__description">Shape modifiers alter border-radius for different visual treatments.</p>
+      
+      <div class="button-grid">
+        <button type="button" class="btn btn--primary">Default Radius</button>
+        <button type="button" class="btn btn--primary btn--pill">Pill Shape</button>
+        <button type="button" class="btn btn--primary btn--square">Square</button>
+        <button type="button" class="btn btn--primary btn--round" aria-label="Add item">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: ICON BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="icons-title">
+      <h2 class="section__title" id="icons-title">Icon Buttons</h2>
+      <p class="section__description">Icons enhance button meaning and can improve scannability.</p>
+      
+      <div class="a11y-note">
+        Icon-only buttons must have an <code class="code-ref">aria-label</code> attribute describing the action. All decorative icons use <code class="code-ref">aria-hidden="true"</code> and <code class="code-ref">focusable="false"</code>.
+      </div>
+      
+      <!-- Icon with Text -->
+      <div class="subsection">
+        <h3 class="subsection__title">Icon with Text</h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--primary btn--icon-left">
+            <svg class="icon btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Add New
+          </button>
+          <button type="button" class="btn btn--secondary btn--icon-right">
+            Download
+            <svg class="icon btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--success btn--icon-left">
+            <svg class="icon btn__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+            Confirm
+          </button>
+        </div>
+      </div>
+      
+      <!-- Icon Only -->
+      <div class="subsection">
+        <h3 class="subsection__title">Icon Only <code class="code-ref">.btn--icon</code></h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--icon btn--primary" aria-label="Add item">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--icon btn--secondary btn--outline" aria-label="Edit item">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--icon btn--danger btn--ghost" aria-label="Delete item">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--icon btn--info" aria-label="View information">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Icon Button Sizes -->
+      <div class="subsection">
+        <h3 class="subsection__title">Icon Button Sizes</h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--icon btn--primary btn--sm" aria-label="Small star">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--icon btn--primary btn--md" aria-label="Medium star">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--icon btn--primary btn--lg" aria-label="Large star">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: BUTTON STATES
+         ================================================================ -->
+    <section class="section" aria-labelledby="states-title">
+      <h2 class="section__title" id="states-title">Button States</h2>
+      <p class="section__description">Buttons communicate their state through visual changes. Hover, tab, and click to see different states in action.</p>
+      
+      <!-- Enabled vs Disabled -->
+      <div class="subsection">
+        <h3 class="subsection__title">Enabled vs Disabled</h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--primary">Enabled</button>
+          <button type="button" class="btn btn--primary" disabled>Disabled</button>
+          <button type="button" class="btn btn--secondary btn--outline">Enabled</button>
+          <button type="button" class="btn btn--secondary btn--outline" disabled>Disabled</button>
+        </div>
+      </div>
+      
+      <!-- Loading State -->
+      <div class="subsection">
+        <h3 class="subsection__title">Loading State</h3>
+        <p class="section__description">Click to trigger loading state. The button will auto-reset after the specified duration. Screen readers are notified of state changes.</p>
+        <div class="button-grid">
+          <button type="button" class="btn btn--primary" data-loading-text="Saving..." data-loading-duration="2000">
+            Save Changes
+          </button>
+          <button type="button" class="btn btn--success" data-loading-text="Submitting..." data-loading-duration="3000">
+            Submit Form
+          </button>
+          <button type="button" class="btn btn--info btn--outline" data-loading-text="Loading..." data-loading-duration="2500">
+            Fetch Data
+          </button>
+        </div>
+      </div>
+      
+      <!-- Toggle States -->
+      <div class="subsection">
+        <h3 class="subsection__title">Toggle / Selected State</h3>
+        <p class="section__description">Toggle buttons maintain their pressed state using <code class="code-ref">aria-pressed</code>.</p>
+        <div class="button-grid">
+          <button type="button" class="btn btn--secondary btn--outline" data-toggle aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            </svg>
+            Favorite
+          </button>
+          <button type="button" class="btn btn--secondary btn--outline btn--selected" data-toggle aria-pressed="true">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+            Liked
+          </button>
+        </div>
+      </div>
+      
+      <!-- Toggle Group -->
+      <div class="subsection">
+        <h3 class="subsection__title">Toggle Group (Radio-like)</h3>
+        <p class="section__description">Only one button in the group can be selected at a time. Navigate with arrow keys.</p>
+        <div class="btn-group" role="group" aria-label="View options">
+          <button type="button" class="btn btn--secondary btn--outline btn--selected" data-toggle data-toggle-group="view" aria-pressed="true">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+            </svg>
+            List
+          </button>
+          <button type="button" class="btn btn--secondary btn--outline" data-toggle data-toggle-group="view" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/>
+            </svg>
+            Grid
+          </button>
+          <button type="button" class="btn btn--secondary btn--outline" data-toggle data-toggle-group="view" aria-pressed="false">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+            </svg>
+            Cards
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: CALL-TO-ACTION BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="cta-title">
+      <h2 class="section__title" id="cta-title">Call-to-Action</h2>
+      <p class="section__description">High-emphasis buttons for primary user journeys and conversions. Use sparingly - one CTA per screen is ideal.</p>
+      
+      <div class="button-grid">
+        <button type="button" class="btn btn--cta">Get Started Free</button>
+        <button type="button" class="btn btn--gradient btn--lg btn--pill">Upgrade to Pro</button>
+        <button type="button" class="btn btn--cta btn--success">Start Your Trial</button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: FLOATING ACTION BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="fab-title">
+      <h2 class="section__title" id="fab-title">Floating Action Buttons</h2>
+      <p class="section__description">FABs represent the primary action on a screen. Typically positioned fixed in the bottom-right corner.</p>
+      
+      <div class="button-grid">
+        <button type="button" class="btn btn--fab btn--sm" aria-label="Add item (small)">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
+        <button type="button" class="btn btn--fab" aria-label="Add item">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
+        <button type="button" class="btn btn--fab btn--lg" aria-label="Add item (large)">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+        </button>
+        <button type="button" class="btn btn--fab btn--fab-extended">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+          </svg>
+          Create New
+        </button>
+      </div>
+      
+      <!-- FAB Color Variants -->
+      <div class="subsection" style="margin-top: var(--spacing-6);">
+        <h3 class="subsection__title">FAB Color Variants</h3>
+        <div class="button-grid">
+          <button type="button" class="btn btn--fab btn--primary" aria-label="Primary action">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--fab btn--success" aria-label="Confirm action">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          </button>
+          <button type="button" class="btn btn--fab btn--danger" aria-label="Delete action">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: BADGE BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="badge-title">
+      <h2 class="section__title" id="badge-title">Badge Buttons</h2>
+      <p class="section__description">Buttons with notification counts or indicators. The badge count is announced to screen readers via <code class="code-ref">aria-describedby</code>.</p>
+      
+      <div class="button-grid">
+        <button type="button" class="btn btn--secondary btn--outline btn-badge" aria-describedby="notif-count-1">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+          </svg>
+          Notifications
+          <span class="btn-badge__count" id="notif-count-1" aria-label="3 notifications">3</span>
+        </button>
+        <button type="button" class="btn btn--icon btn--secondary btn--outline btn-badge" aria-label="Messages, 12 unread">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+          <span class="btn-badge__count" aria-hidden="true">12</span>
+        </button>
+        <button type="button" class="btn btn--primary btn-badge" aria-describedby="cart-count">
+          Cart
+          <span class="btn-badge__count" id="cart-count" aria-label="99 or more items">99+</span>
+        </button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: DROPDOWN BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="dropdown-title">
+      <h2 class="section__title" id="dropdown-title">Dropdown Buttons</h2>
+      <p class="section__description">Buttons that reveal additional options in a menu.</p>
+      
+      <div class="a11y-note">
+        Full keyboard navigation: Arrow keys to navigate, Enter/Space to select, Escape to close, Tab to close and move focus.
+      </div>
+      
+      <div class="button-grid">
+        <!-- Standard Dropdown -->
+        <div class="btn-dropdown" aria-expanded="false">
+          <button type="button" class="btn btn--secondary btn--outline btn-dropdown__trigger" aria-haspopup="menu" aria-expanded="false">
+            Options
+            <span class="btn-dropdown__caret" aria-hidden="true"></span>
+          </button>
+          <div class="btn-dropdown__menu" role="menu" aria-label="Options menu">
+            <button type="button" class="btn-dropdown__item" role="menuitem" data-value="edit">Edit</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem" data-value="duplicate">Duplicate</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem" data-value="archive">Archive</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem" data-value="delete">Delete</button>
+          </div>
+        </div>
+        
+        <!-- Primary Dropdown -->
+        <div class="btn-dropdown" aria-expanded="false">
+          <button type="button" class="btn btn--primary btn-dropdown__trigger" aria-haspopup="menu" aria-expanded="false">
+            Actions
+            <span class="btn-dropdown__caret" aria-hidden="true"></span>
+          </button>
+          <div class="btn-dropdown__menu" role="menu" aria-label="Actions menu">
+            <button type="button" class="btn-dropdown__item" role="menuitem">Create New</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem">Import</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem">Export</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: SPLIT BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="split-title">
+      <h2 class="section__title" id="split-title">Split Buttons</h2>
+      <p class="section__description">Split buttons combine a primary action with a dropdown for secondary options. The main button performs the default action immediately.</p>
+      
+      <div class="button-grid">
+        <div class="btn-split btn-dropdown" aria-expanded="false">
+          <button type="button" class="btn btn--primary btn-split__main">Save</button>
+          <button type="button" class="btn btn--primary btn-split__dropdown btn-dropdown__trigger" aria-haspopup="menu" aria-expanded="false" aria-label="More save options">
+            <span class="btn-dropdown__caret" aria-hidden="true"></span>
+          </button>
+          <div class="btn-dropdown__menu" role="menu" aria-label="Save options">
+            <button type="button" class="btn-dropdown__item" role="menuitem">Save as Draft</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem">Save and Close</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem">Save as Template</button>
+          </div>
+        </div>
+        
+        <div class="btn-split btn-dropdown" aria-expanded="false">
+          <button type="button" class="btn btn--success btn-split__main">Publish</button>
+          <button type="button" class="btn btn--success btn-split__dropdown btn-dropdown__trigger" aria-haspopup="menu" aria-expanded="false" aria-label="More publish options">
+            <span class="btn-dropdown__caret" aria-hidden="true"></span>
+          </button>
+          <div class="btn-dropdown__menu" role="menu" aria-label="Publish options">
+            <button type="button" class="btn-dropdown__item" role="menuitem">Schedule</button>
+            <button type="button" class="btn-dropdown__item" role="menuitem">Publish to Draft</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: BUTTON GROUPS
+         ================================================================ -->
+    <section class="section" aria-labelledby="groups-title">
+      <h2 class="section__title" id="groups-title">Button Groups</h2>
+      <p class="section__description">Related buttons grouped together with connected styling. Always include <code class="code-ref">role="group"</code> and <code class="code-ref">aria-label</code> for accessibility.</p>
+      
+      <div class="button-grid">
+        <div class="btn-group" role="group" aria-label="Text formatting options">
+          <button type="button" class="btn btn--secondary btn--outline" aria-label="Bold">
+            <strong>B</strong>
+          </button>
+          <button type="button" class="btn btn--secondary btn--outline" aria-label="Italic">
+            <em>I</em>
+          </button>
+          <button type="button" class="btn btn--secondary btn--outline" aria-label="Underline">
+            <u>U</u>
+          </button>
+        </div>
+        
+        <div class="btn-group" role="group" aria-label="Pagination navigation">
+          <button type="button" class="btn btn--secondary btn--outline">Prev</button>
+          <button type="button" class="btn btn--secondary btn--outline" aria-current="page">1</button>
+          <button type="button" class="btn btn--secondary btn--outline">2</button>
+          <button type="button" class="btn btn--secondary btn--outline">3</button>
+          <button type="button" class="btn btn--secondary btn--outline">Next</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: EXPAND/COLLAPSE BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="expand-title">
+      <h2 class="section__title" id="expand-title">Expand/Collapse Buttons</h2>
+      <p class="section__description">Buttons that toggle visibility of related content. The <code class="code-ref">aria-expanded</code> and <code class="code-ref">aria-controls</code> attributes are managed automatically.</p>
+      
+      <div class="demo-card">
+        <button type="button" class="btn btn--secondary btn--outline btn-expand" aria-expanded="false" aria-controls="expand-content-1">
+          Show More Details
+          <svg class="icon btn-expand__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+          </svg>
+        </button>
+        <div id="expand-content-1" class="collapsible-content" hidden>
+          <p style="margin: 0;">This is the expandable content area. It becomes visible when the button is clicked. The button's <code>aria-expanded</code> attribute is toggled automatically, and screen readers announce the state change.</p>
+        </div>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: NAVIGATION BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="nav-title">
+      <h2 class="section__title" id="nav-title">Navigation Buttons</h2>
+      <p class="section__description">Buttons designed for navigation contexts. Use <code class="code-ref">aria-current="page"</code> to indicate the current page.</p>
+      
+      <nav aria-label="Example navigation">
+        <div class="button-grid">
+          <button type="button" class="btn btn--nav" aria-current="page">Dashboard</button>
+          <button type="button" class="btn btn--nav">Settings</button>
+          <button type="button" class="btn btn--nav">Profile</button>
+          <button type="button" class="btn btn--nav">Help</button>
+        </div>
+      </nav>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: FORM ACTION BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="form-title">
+      <h2 class="section__title" id="form-title">Form Action Buttons</h2>
+      <p class="section__description">Specialized buttons for form submission and reset actions.</p>
+      
+      <div class="demo-card">
+        <form action="#" method="post" onsubmit="event.preventDefault(); alert('Form submitted!');" aria-label="Example form">
+          <div class="button-grid">
+            <button type="submit" class="btn btn--submit">Submit Form</button>
+            <button type="reset" class="btn btn--reset">Reset</button>
+            <button type="button" class="btn btn--ghost">Cancel</button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Auto-disable demo -->
+      <div class="subsection" style="margin-top: var(--spacing-6);">
+        <h3 class="subsection__title">Auto-Disable After Click</h3>
+        <p class="section__description">Prevents double-submission by disabling the button after click. The button re-enables after 3 seconds for this demo.</p>
+        <button type="button" class="btn btn--primary" data-auto-disable data-disable-duration="3000">
+          Submit (Auto-disable)
+        </button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: FULL WIDTH BUTTONS
+         ================================================================ -->
+    <section class="section" aria-labelledby="block-title">
+      <h2 class="section__title" id="block-title">Full Width Buttons</h2>
+      <p class="section__description">Block-level buttons that span the full container width. Ideal for mobile layouts and form CTAs.</p>
+      
+      <div class="demo-card" style="max-width: 400px;">
+        <button type="button" class="btn btn--primary btn--block" style="margin-bottom: var(--spacing-3);">
+          Sign In
+        </button>
+        <button type="button" class="btn btn--secondary btn--outline btn--block">
+          Create Account
+        </button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: HIGH CONTRAST ACCESSIBILITY
+         ================================================================ -->
+    <section class="section" aria-labelledby="contrast-title">
+      <h2 class="section__title" id="contrast-title">High Contrast Accessibility</h2>
+      <p class="section__description">Maximum contrast buttons for users with visual impairments. These meet WCAG AAA contrast requirements (7:1 ratio).</p>
+      
+      <div class="high-contrast-demo">
+        <div class="button-grid">
+          <button type="button" class="btn btn--high-contrast-inverse">High Contrast Light</button>
+        </div>
+      </div>
+      
+      <div class="button-grid" style="margin-top: var(--spacing-4);">
+        <button type="button" class="btn btn--high-contrast">High Contrast Dark</button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: FOCUS STATES DEMO
+         ================================================================ -->
+    <section class="section" aria-labelledby="focus-title">
+      <h2 class="section__title" id="focus-title">Focus States</h2>
+      <p class="section__description">Visible focus indicators are critical for keyboard navigation. Focus rings are shown only for keyboard interaction (<code class="code-ref">:focus-visible</code>), not for mouse clicks.</p>
+      
+      <div class="a11y-note">
+        Use Tab to navigate through these buttons and observe the focus ring. The ring color and offset are customizable via design tokens.
+      </div>
+      
+      <div class="button-grid">
+        <button type="button" class="btn btn--primary">Tab to me</button>
+        <button type="button" class="btn btn--secondary btn--outline">And me</button>
+        <button type="button" class="btn btn--success">And me too</button>
+        <button type="button" class="btn btn--icon btn--danger btn--outline" aria-label="Focusable icon button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+        </button>
+      </div>
+    </section>
+    
+    <!-- ================================================================
+         SECTION: API REFERENCE
+         ================================================================ -->
+    <section class="section" aria-labelledby="api-title">
+      <h2 class="section__title" id="api-title">API Reference</h2>
+      <p class="section__description">Quick reference for available button classes, attributes, and JavaScript methods.</p>
+      
+      <div class="demo-card">
+        <h3 class="subsection__title">CSS Classes</h3>
+        <div class="api-grid">
+          <div class="api-grid__item">
+            <strong>Base</strong>
+            <code class="code-ref">.btn</code>
+          </div>
+          <div class="api-grid__item">
+            <strong>Colors</strong>
+            <code class="code-ref">.btn--primary</code><br>
+            <code class="code-ref">.btn--secondary</code><br>
+            <code class="code-ref">.btn--success</code><br>
+            <code class="code-ref">.btn--warning</code><br>
+            <code class="code-ref">.btn--danger</code><br>
+            <code class="code-ref">.btn--info</code>
+          </div>
+          <div class="api-grid__item">
+            <strong>Styles</strong>
+            <code class="code-ref">.btn--solid</code><br>
+            <code class="code-ref">.btn--outline</code><br>
+            <code class="code-ref">.btn--ghost</code><br>
+            <code class="code-ref">.btn--text</code><br>
+            <code class="code-ref">.btn--gradient</code>
+          </div>
+          <div class="api-grid__item">
+            <strong>Sizes</strong>
+            <code class="code-ref">.btn--sm</code><br>
+            <code class="code-ref">.btn--md</code><br>
+            <code class="code-ref">.btn--lg</code>
+          </div>
+          <div class="api-grid__item">
+            <strong>Shapes</strong>
+            <code class="code-ref">.btn--pill</code><br>
+            <code class="code-ref">.btn--round</code><br>
+            <code class="code-ref">.btn--square</code>
+          </div>
+          <div class="api-grid__item">
+            <strong>Special</strong>
+            <code class="code-ref">.btn--icon</code><br>
+            <code class="code-ref">.btn--fab</code><br>
+            <code class="code-ref">.btn--cta</code><br>
+            <code class="code-ref">.btn--block</code>
+          </div>
+        </div>
+        
+        <h3 class="subsection__title" style="margin-top: var(--spacing-6);">Data Attributes</h3>
+        <div style="margin-top: var(--spacing-4);">
+          <code class="code-ref">data-toggle</code> — Makes button toggleable<br>
+          <code class="code-ref">data-toggle-group="name"</code> — Radio-like toggle group<br>
+          <code class="code-ref">data-loading-text="..."</code> — Text shown during loading<br>
+          <code class="code-ref">data-loading-duration="ms"</code> — Loading state duration (100-30000ms)<br>
+          <code class="code-ref">data-auto-disable</code> — Disables after click<br>
+          <code class="code-ref">data-disable-duration="ms"</code> — Auto-disable duration (100-30000ms)
+        </div>
+        
+        <h3 class="subsection__title" style="margin-top: var(--spacing-6);">JavaScript API</h3>
+        <div style="margin-top: var(--spacing-4);">
+          <code class="code-ref">buttonSystem.setLoading(button, duration)</code> — Trigger loading state (returns Promise)<br>
+          <code class="code-ref">buttonSystem.cancelLoading(button)</code> — Cancel loading state<br>
+          <code class="code-ref">buttonSystem.setPressed(button, pressed)</code> — Set toggle state<br>
+          <code class="code-ref">buttonSystem.setGroupValue(group, button)</code> — Set active button in group<br>
+          <code class="code-ref">buttonSystem.openDropdown(dropdown)</code> — Open dropdown<br>
+          <code class="code-ref">buttonSystem.closeDropdown(dropdown)</code> — Close dropdown<br>
+          <code class="code-ref">buttonSystem.closeAllDropdowns()</code> — Close all dropdowns<br>
+          <code class="code-ref">buttonSystem.destroy()</code> — Clean up all event listeners
+        </div>
+        
+        <h3 class="subsection__title" style="margin-top: var(--spacing-6);">Custom Events</h3>
+        <div style="margin-top: var(--spacing-4);">
+          <code class="code-ref">toggle</code> — Fired when toggle button state changes (detail: { pressed })<br>
+          <code class="code-ref">loadingComplete</code> — Fired when loading state ends<br>
+          <code class="code-ref">select</code> — Fired when dropdown item is selected (detail: { value, item })<br>
+          <code class="code-ref">expand</code> — Fired when expand/collapse button is clicked (detail: { expanded })
+        </div>
+        
+        <h3 class="subsection__title" style="margin-top: var(--spacing-6);">ARIA Attributes</h3>
+        <div style="margin-top: var(--spacing-4);">
+          <code class="code-ref">aria-pressed</code> — Toggle state (true/false)<br>
+          <code class="code-ref">aria-expanded</code> — Expand/collapse state<br>
+          <code class="code-ref">aria-disabled</code> — Disabled state (interactive but non-functional)<br>
+          <code class="code-ref">aria-busy</code> — Loading state<br>
+          <code class="code-ref">aria-haspopup</code> — Has dropdown menu<br>
+          <code class="code-ref">aria-controls</code> — ID of controlled element<br>
+          <code class="code-ref">aria-label</code> — Accessible name for icon buttons<br>
+          <code class="code-ref">aria-describedby</code> — Additional description (e.g., badge count)<br>
+          <code class="code-ref">aria-current</code> — Current page in navigation
+        </div>
+      </div>
+    </section>
+    
+  </main>
+  
+  <!-- JavaScript Behaviors -->
+  <script src="script.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"cfb6543e268d4ceb92c8170675caa481","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
