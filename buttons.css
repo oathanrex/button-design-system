@@ -1,0 +1,1158 @@
+/**
+ * ==========================================================================
+ * BUTTON COMPONENT STYLES - buttons.css
+ * ==========================================================================
+ * @version 3.0.0
+ * @description Comprehensive button component system built with CSS custom properties.
+ * 
+ * Architecture:
+ * - Base styles (.btn)
+ * - Color variants (.btn--primary, .btn--secondary, etc.)
+ * - Style variants (.btn--solid, .btn--outline, etc.)
+ * - Size modifiers (.btn--sm, .btn--md, .btn--lg)
+ * - Shape modifiers (.btn--pill, .btn--round, .btn--square)
+ * - Special types (.btn--icon, .btn--fab, .btn--split)
+ * - States (hover, active, focus, disabled, loading)
+ * 
+ * CHANGELOG v3.0.0:
+ * - Fixed split button + loading state pseudo-element conflict
+ * - Added CSS containment to dropdown menu
+ * - Fixed color contrast on warning buttons
+ * - Added GPU-accelerated spinner option
+ * - Fixed RTL dropdown positioning
+ * - Added consistent specificity patterns
+ * - Added semantic token usage for magic numbers
+ * 
+ * ==========================================================================
+ */
+
+/* ========================================================================
+ * BASE BUTTON STYLES
+ * ========================================================================
+ * Foundation styles applied to all buttons. Uses CSS custom properties
+ * for easy theming and variant overrides.
+ * 
+ * Private custom properties (prefixed with _) are internal implementation
+ * details that can be overridden by variant classes.
+ * ======================================================================== */
+
+.btn {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  
+  /* Sizing - defaults to medium */
+  height: var(--btn-height-md);
+  min-width: var(--btn-height-md); /* Ensures minimum touch target */
+  padding: 0 var(--btn-padding-x-md);
+  
+  /* Typography */
+  font-family: var(--font-family-base);
+  font-size: var(--btn-font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+  text-decoration: none;
+  white-space: nowrap;
+  
+  /* Text overflow handling for long content */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  /* Visual - using private custom properties for variant overrides */
+  background-color: var(--_btn-bg, var(--color-neutral-100));
+  color: var(--_btn-text, var(--color-neutral-900));
+  border: 1px solid var(--_btn-border, transparent);
+  border-radius: var(--radius-lg);
+  
+  /* Interaction */
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation; /* Disables double-tap zoom on mobile */
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on iOS */
+  
+  /* Transitions - respects prefers-reduced-motion via tokens */
+  transition: 
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+  
+  /* Reset browser defaults */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  outline: none;
+  margin: 0; /* Reset default margins */
+  
+  /* Positioning context for loading spinner and badges */
+  position: relative;
+  isolation: isolate; /* Creates stacking context */
+  
+  /* Performance optimization - limits paint/layout scope */
+  contain: layout style;
+  
+  /* Ensure button text is vertically centered */
+  vertical-align: middle;
+}
+
+/* Remove Firefox's inner focus ring and padding */
+.btn::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/* ========================================================================
+ * FOCUS STATES
+ * ========================================================================
+ * Visible focus indicators for keyboard navigation (WCAG 2.1 compliance).
+ * Using :focus-visible to only show focus ring on keyboard interaction.
+ * ======================================================================== */
+
+.btn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* High contrast focus for dark-background variants */
+.btn.btn--primary:focus-visible,
+.btn.btn--danger:focus-visible,
+.btn.btn--success:focus-visible,
+.btn.btn--info:focus-visible {
+  outline-color: var(--color-neutral-0);
+  box-shadow: 0 0 0 calc(var(--focus-ring-offset) + var(--focus-ring-width) + 1px) var(--color-neutral-900);
+}
+
+/* Forced colors mode - use system highlight */
+@media (forced-colors: active) {
+  .btn:focus-visible {
+    outline: var(--focus-ring-width-thick) solid Highlight;
+    outline-offset: var(--focus-ring-offset);
+  }
+}
+
+/* ========================================================================
+ * HOVER STATES
+ * ========================================================================
+ * Visual feedback when hovering over interactive buttons.
+ * Uses @media hover to prevent sticky hover on touch devices.
+ * ======================================================================== */
+
+@media (hover: hover) {
+  .btn:hover:not(:disabled):not([aria-disabled="true"]):not(.btn--loading) {
+    background-color: var(--_btn-bg-hover, var(--color-neutral-200));
+    border-color: var(--_btn-border-hover, transparent);
+    color: var(--_btn-text-hover, var(--_btn-text));
+  }
+}
+
+/* Touch device fallback - show hover style on active */
+@media (hover: none) {
+  .btn:active:not(:disabled):not([aria-disabled="true"]):not(.btn--loading) {
+    background-color: var(--_btn-bg-hover, var(--color-neutral-200));
+  }
+}
+
+/* ========================================================================
+ * ACTIVE / PRESSED STATES
+ * ========================================================================
+ * Visual feedback when button is being pressed.
+ * Subtle scale transform provides tactile feedback.
+ * ======================================================================== */
+
+.btn:active:not(:disabled):not([aria-disabled="true"]):not(.btn--loading) {
+  background-color: var(--_btn-bg-active, var(--color-neutral-300));
+  transform: scale(0.98);
+}
+
+/* ========================================================================
+ * DISABLED STATES
+ * ========================================================================
+ * Styling for non-interactive disabled buttons.
+ * 
+ * IMPORTANT: Always use the `disabled` attribute, not just aria-disabled,
+ * to ensure the button is truly non-interactive.
+ * ======================================================================== */
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  background-color: var(--color-disabled-bg);
+  color: var(--color-disabled-text);
+  border-color: var(--color-disabled-border);
+  cursor: not-allowed;
+  opacity: 0.7;
+  
+  /* Remove transforms to prevent visual glitches */
+  transform: none !important;
+}
+
+/* Ensure disabled buttons don't trigger pointer events */
+.btn:disabled {
+  pointer-events: none;
+}
+
+/* aria-disabled allows interaction (for form validation feedback) */
+.btn[aria-disabled="true"] {
+  pointer-events: auto;
+}
+
+/* Ensure disabled outline buttons look consistent */
+.btn.btn--outline:disabled,
+.btn.btn--outline[aria-disabled="true"] {
+  background-color: transparent;
+}
+
+/* Forced colors mode */
+@media (forced-colors: active) {
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    color: GrayText;
+    border-color: GrayText;
+    forced-color-adjust: none;
+  }
+}
+
+/* ========================================================================
+ * LOADING STATES
+ * ========================================================================
+ * Spinner animation and styling for async operations.
+ * 
+ * IMPLEMENTATION NOTES:
+ * - Uses ::after pseudo-element for spinner
+ * - Spinner color is set explicitly via private property
+ * - will-change improves animation performance
+ * - GPU-accelerated via transform-only animation
+ * ======================================================================== */
+
+.btn.btn--loading {
+  /* Hide text while preserving button dimensions */
+  color: transparent !important;
+  pointer-events: none;
+  cursor: wait;
+}
+
+/* Prevent child elements from being visible during loading */
+.btn.btn--loading > * {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Loading spinner - positioned absolutely in center */
+.btn.btn--loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--spinner-size);
+  height: var(--spinner-size);
+  margin-top: calc(var(--spinner-size) / -2);
+  margin-left: calc(var(--spinner-size) / -2);
+  
+  /* Spinner visual style - using explicit color to avoid inheritance issues */
+  border: var(--spinner-border-width) solid var(--_btn-spinner-color, var(--color-neutral-600));
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  
+  /* Animation with GPU acceleration */
+  animation: btn-spinner var(--spinner-animation-duration) linear infinite;
+  will-change: transform;
+  
+  /* Ensure spinner is always visible */
+  visibility: visible !important;
+  opacity: 1 !important;
+  
+  /* Higher z-index to appear above other content */
+  z-index: 1;
+}
+
+/* Set spinner colors for different button variants */
+.btn.btn--primary.btn--loading::after,
+.btn.btn--danger.btn--loading::after,
+.btn.btn--success.btn--loading::after,
+.btn.btn--info.btn--loading::after {
+  --_btn-spinner-color: var(--color-neutral-0);
+}
+
+/* Warning uses dark spinner due to light background */
+.btn.btn--warning.btn--loading::after {
+  --_btn-spinner-color: var(--color-neutral-900);
+}
+
+.btn.btn--outline.btn--loading::after,
+.btn.btn--ghost.btn--loading::after {
+  --_btn-spinner-color: var(--color-neutral-600);
+}
+
+/* Colored outline/ghost buttons use their text color for spinner */
+.btn.btn--outline.btn--primary.btn--loading::after,
+.btn.btn--ghost.btn--primary.btn--loading::after {
+  --_btn-spinner-color: var(--color-primary-600);
+}
+
+.btn.btn--outline.btn--danger.btn--loading::after,
+.btn.btn--ghost.btn--danger.btn--loading::after {
+  --_btn-spinner-color: var(--color-danger-600);
+}
+
+@keyframes btn-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ========================================================================
+ * SELECTED / TOGGLED STATES
+ * ========================================================================
+ * For toggle buttons that maintain pressed state.
+ * Triggered by aria-pressed="true" or .btn--selected class.
+ * ======================================================================== */
+
+.btn[aria-pressed="true"],
+.btn.btn--selected {
+  background-color: var(--_btn-bg-selected, var(--color-primary-100));
+  color: var(--_btn-text-selected, var(--color-primary-700));
+  border-color: var(--_btn-border-selected, var(--color-primary-300));
+}
+
+@media (hover: hover) {
+  .btn[aria-pressed="true"]:hover:not(:disabled),
+  .btn.btn--selected:hover:not(:disabled) {
+    background-color: var(--_btn-bg-selected-hover, var(--color-primary-200));
+  }
+}
+
+/* ========================================================================
+ * COLOR VARIANTS
+ * ========================================================================
+ * Semantic color options for different button purposes.
+ * Each variant defines its own color custom properties.
+ * 
+ * Specificity: .btn.btn--{variant} ensures proper cascade
+ * ======================================================================== */
+
+/* Primary - Main call-to-action buttons */
+.btn.btn--primary {
+  --_btn-bg: var(--color-primary-500);
+  --_btn-bg-hover: var(--color-primary-600);
+  --_btn-bg-active: var(--color-primary-700);
+  --_btn-text: var(--color-neutral-0);
+  --_btn-border: var(--color-primary-500);
+  --_btn-border-hover: var(--color-primary-600);
+}
+
+/* Secondary - Supporting actions */
+.btn.btn--secondary {
+  --_btn-bg: var(--color-secondary-100);
+  --_btn-bg-hover: var(--color-secondary-200);
+  --_btn-bg-active: var(--color-secondary-300);
+  --_btn-text: var(--color-secondary-700);
+  --_btn-border: var(--color-secondary-200);
+  --_btn-border-hover: var(--color-secondary-300);
+}
+
+/* Success - Positive/confirmation actions */
+.btn.btn--success {
+  --_btn-bg: var(--color-success-600); /* Using 600 for better contrast */
+  --_btn-bg-hover: var(--color-success-700);
+  --_btn-bg-active: var(--color-success-800);
+  --_btn-text: var(--color-neutral-0);
+  --_btn-border: var(--color-success-600);
+  --_btn-border-hover: var(--color-success-700);
+}
+
+/* Warning - Caution actions (ALWAYS uses dark text for WCAG compliance) */
+.btn.btn--warning {
+  --_btn-bg: var(--color-warning-400); /* Lighter background for contrast */
+  --_btn-bg-hover: var(--color-warning-500);
+  --_btn-bg-active: var(--color-warning-600);
+  --_btn-text: var(--color-neutral-900); /* Dark text - WCAG compliant */
+  --_btn-border: var(--color-warning-400);
+  --_btn-border-hover: var(--color-warning-500);
+}
+
+/* Danger - Destructive actions */
+.btn.btn--danger {
+  --_btn-bg: var(--color-danger-600); /* Using 600 for better contrast */
+  --_btn-bg-hover: var(--color-danger-700);
+  --_btn-bg-active: var(--color-danger-800);
+  --_btn-text: var(--color-neutral-0);
+  --_btn-border: var(--color-danger-600);
+  --_btn-border-hover: var(--color-danger-700);
+}
+
+/* Info - Informational actions */
+.btn.btn--info {
+  --_btn-bg: var(--color-info-600); /* Using 600 for better contrast */
+  --_btn-bg-hover: var(--color-info-700);
+  --_btn-bg-active: var(--color-info-800);
+  --_btn-text: var(--color-neutral-0);
+  --_btn-border: var(--color-info-600);
+  --_btn-border-hover: var(--color-info-700);
+}
+
+/* ========================================================================
+ * STYLE VARIANTS
+ * ========================================================================
+ * Different visual treatments for the same semantic button.
+ * ======================================================================== */
+
+/* Solid (default) - Filled background, implicitly applied */
+.btn.btn--solid {
+  /* Uses default color variant values */
+}
+
+/* Outline - Border only, transparent background */
+.btn.btn--outline {
+  background-color: transparent;
+  border-color: var(--_btn-border, var(--color-neutral-300));
+  color: var(--_btn-outline-text, var(--color-neutral-700));
+}
+
+.btn.btn--outline.btn--primary {
+  --_btn-outline-text: var(--color-primary-600);
+  --_btn-border: var(--color-primary-500);
+  --_btn-bg-hover: var(--color-primary-50);
+  --_btn-bg-active: var(--color-primary-100);
+}
+
+.btn.btn--outline.btn--secondary {
+  --_btn-outline-text: var(--color-secondary-600);
+  --_btn-border: var(--color-secondary-400);
+  --_btn-bg-hover: var(--color-secondary-50);
+  --_btn-bg-active: var(--color-secondary-100);
+}
+
+.btn.btn--outline.btn--success {
+  --_btn-outline-text: var(--color-success-700); /* Darker for contrast */
+  --_btn-border: var(--color-success-600);
+  --_btn-bg-hover: var(--color-success-50);
+  --_btn-bg-active: var(--color-success-100);
+}
+
+.btn.btn--outline.btn--warning {
+  --_btn-outline-text: var(--color-warning-800); /* Much darker for contrast */
+  --_btn-border: var(--color-warning-600);
+  --_btn-bg-hover: var(--color-warning-50);
+  --_btn-bg-active: var(--color-warning-100);
+}
+
+.btn.btn--outline.btn--danger {
+  --_btn-outline-text: var(--color-danger-700); /* Darker for contrast */
+  --_btn-border: var(--color-danger-600);
+  --_btn-bg-hover: var(--color-danger-50);
+  --_btn-bg-active: var(--color-danger-100);
+}
+
+.btn.btn--outline.btn--info {
+  --_btn-outline-text: var(--color-info-700); /* Darker for contrast */
+  --_btn-border: var(--color-info-600);
+  --_btn-bg-hover: var(--color-info-50);
+  --_btn-bg-active: var(--color-info-100);
+}
+
+@media (hover: hover) {
+  .btn.btn--outline:hover:not(:disabled):not(.btn--loading) {
+    color: var(--_btn-outline-text);
+  }
+}
+
+/* Ghost - No border, transparent background until hover */
+.btn.btn--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--_btn-ghost-text, var(--color-neutral-700));
+}
+
+.btn.btn--ghost.btn--primary {
+  --_btn-ghost-text: var(--color-primary-600);
+  --_btn-bg-hover: var(--color-primary-50);
+  --_btn-bg-active: var(--color-primary-100);
+}
+
+.btn.btn--ghost.btn--secondary {
+  --_btn-ghost-text: var(--color-secondary-600);
+  --_btn-bg-hover: var(--color-secondary-100);
+  --_btn-bg-active: var(--color-secondary-200);
+}
+
+.btn.btn--ghost.btn--success {
+  --_btn-ghost-text: var(--color-success-700);
+  --_btn-bg-hover: var(--color-success-50);
+  --_btn-bg-active: var(--color-success-100);
+}
+
+.btn.btn--ghost.btn--warning {
+  --_btn-ghost-text: var(--color-warning-800);
+  --_btn-bg-hover: var(--color-warning-50);
+  --_btn-bg-active: var(--color-warning-100);
+}
+
+.btn.btn--ghost.btn--danger {
+  --_btn-ghost-text: var(--color-danger-700);
+  --_btn-bg-hover: var(--color-danger-50);
+  --_btn-bg-active: var(--color-danger-100);
+}
+
+@media (hover: hover) {
+  .btn.btn--ghost:hover:not(:disabled):not(.btn--loading) {
+    color: var(--_btn-ghost-text);
+  }
+}
+
+/* Text - Minimal, link-like appearance */
+.btn.btn--text {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--_btn-text-variant, var(--color-primary-600));
+  padding: 0 var(--spacing-2);
+  height: auto;
+  min-height: var(--btn-height-md);
+}
+
+@media (hover: hover) {
+  .btn.btn--text:hover:not(:disabled):not(.btn--loading) {
+    background-color: transparent;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}
+
+.btn.btn--text.btn--danger {
+  --_btn-text-variant: var(--color-danger-700);
+}
+
+/* Gradient - Eye-catching CTA buttons */
+.btn.btn--gradient {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-500) 0%,
+    var(--color-info-500) 100%
+  );
+  border: none;
+  color: var(--color-neutral-0);
+}
+
+@media (hover: hover) {
+  .btn.btn--gradient:hover:not(:disabled):not(.btn--loading) {
+    background: linear-gradient(
+      135deg,
+      var(--color-primary-600) 0%,
+      var(--color-info-600) 100%
+    );
+  }
+}
+
+.btn.btn--gradient:active:not(:disabled):not(.btn--loading) {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-700) 0%,
+    var(--color-info-700) 100%
+  );
+}
+
+/* ========================================================================
+ * SIZE MODIFIERS
+ * ========================================================================
+ * Button size options for different contexts.
+ * 
+ * ACCESSIBILITY NOTE: Small buttons (32px) are below the 44px WCAG AAA
+ * touch target recommendation. Use only in desktop contexts or ensure
+ * adequate spacing around the button.
+ * ======================================================================== */
+
+/* Small - For compact UIs, toolbars, dense layouts */
+.btn.btn--sm {
+  height: var(--btn-height-sm);
+  min-width: var(--btn-height-sm);
+  padding: 0 var(--btn-padding-x-sm);
+  font-size: var(--btn-font-size-sm);
+  border-radius: var(--radius-md);
+}
+
+/* Medium (default) - Standard button size */
+.btn.btn--md {
+  height: var(--btn-height-md);
+  min-width: var(--btn-height-md);
+  padding: 0 var(--btn-padding-x-md);
+  font-size: var(--btn-font-size-md);
+}
+
+/* Large - For prominent CTAs and touch-friendly interfaces */
+.btn.btn--lg {
+  height: var(--btn-height-lg);
+  min-width: var(--btn-height-lg);
+  padding: 0 var(--btn-padding-x-lg);
+  font-size: var(--btn-font-size-lg);
+  border-radius: var(--radius-xl);
+}
+
+/* ========================================================================
+ * SHAPE MODIFIERS
+ * ========================================================================
+ * Different border-radius options for buttons.
+ * ======================================================================== */
+
+/* Pill - Fully rounded ends */
+.btn.btn--pill {
+  border-radius: var(--radius-full);
+}
+
+/* Round - Circular button (equal width/height) */
+.btn.btn--round {
+  border-radius: var(--radius-full);
+  width: var(--btn-height-md);
+  padding: 0;
+}
+
+.btn.btn--round.btn--sm {
+  width: var(--btn-height-sm);
+}
+
+.btn.btn--round.btn--lg {
+  width: var(--btn-height-lg);
+}
+
+/* Square - No border radius */
+.btn.btn--square {
+  border-radius: 0;
+}
+
+/* ========================================================================
+ * ICON BUTTONS
+ * ========================================================================
+ * Buttons containing only icons, or icons with text.
+ * 
+ * ACCESSIBILITY: Icon-only buttons MUST have an aria-label or
+ * visually hidden text describing the action.
+ * ======================================================================== */
+
+/* Icon-only button */
+.btn.btn--icon {
+  width: var(--btn-icon-size-md);
+  height: var(--btn-icon-size-md);
+  padding: 0;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.btn.btn--icon.btn--sm {
+  width: var(--btn-icon-size-sm);
+  height: var(--btn-icon-size-sm);
+}
+
+.btn.btn--icon.btn--lg {
+  width: var(--btn-icon-size-lg);
+  height: var(--btn-icon-size-lg);
+}
+
+/* Icon within button */
+.btn__icon {
+  width: 1.25em;
+  height: 1.25em;
+  flex-shrink: 0;
+  pointer-events: none; /* Prevents icon from capturing clicks */
+}
+
+/* Icon positioning with text */
+.btn.btn--icon-left .btn__icon {
+  margin-inline-end: var(--spacing-1);
+}
+
+.btn.btn--icon-right .btn__icon {
+  margin-inline-start: var(--spacing-1);
+}
+
+/* ========================================================================
+ * FLOATING ACTION BUTTON (FAB)
+ * ========================================================================
+ * Material Design-style floating action buttons.
+ * Typically positioned fixed in bottom-right corner.
+ * ======================================================================== */
+
+.btn.btn--fab {
+  width: var(--fab-size-md);
+  height: var(--fab-size-md);
+  border-radius: var(--radius-full);
+  padding: 0;
+  box-shadow: var(--shadow-lg);
+  
+  /* Default to primary color */
+  --_btn-bg: var(--color-primary-500);
+  --_btn-bg-hover: var(--color-primary-600);
+  --_btn-bg-active: var(--color-primary-700);
+  --_btn-text: var(--color-neutral-0);
+}
+
+@media (hover: hover) {
+  .btn.btn--fab:hover:not(:disabled):not(.btn--loading) {
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+  }
+}
+
+.btn.btn--fab:active:not(:disabled):not(.btn--loading) {
+  box-shadow: var(--shadow-md);
+  transform: translateY(0) scale(0.98);
+}
+
+.btn.btn--fab.btn--sm {
+  width: var(--fab-size-sm);
+  height: var(--fab-size-sm);
+}
+
+.btn.btn--fab.btn--lg {
+  width: var(--fab-size-lg);
+  height: var(--fab-size-lg);
+}
+
+/* Extended FAB with text */
+.btn.btn--fab-extended {
+  width: auto;
+  padding: 0 var(--spacing-6);
+  border-radius: var(--radius-full);
+  gap: var(--spacing-2);
+}
+
+/* ========================================================================
+ * BUTTON GROUPS
+ * ========================================================================
+ * Grouped buttons with connected styling.
+ * Use role="group" with aria-label for accessibility.
+ * ======================================================================== */
+
+.btn-group {
+  display: inline-flex;
+  isolation: isolate; /* Creates stacking context */
+}
+
+.btn-group > .btn {
+  border-radius: 0;
+  margin-inline-start: -1px;
+}
+
+.btn-group > .btn:first-child {
+  border-start-start-radius: var(--radius-lg);
+  border-end-start-radius: var(--radius-lg);
+  margin-inline-start: 0;
+}
+
+.btn-group > .btn:last-child {
+  border-start-end-radius: var(--radius-lg);
+  border-end-end-radius: var(--radius-lg);
+}
+
+/* Ensure focused button appears above siblings */
+.btn-group > .btn:focus-visible {
+  z-index: 1;
+}
+
+/* ========================================================================
+ * SPLIT BUTTON
+ * ========================================================================
+ * Button with dropdown trigger separated.
+ * Combines primary action with secondary options.
+ * 
+ * NOTE: Uses a child element for divider instead of pseudo-element
+ * to avoid conflict with loading spinner ::after
+ * ======================================================================== */
+
+.btn-split {
+  display: inline-flex;
+  isolation: isolate;
+}
+
+.btn-split > .btn:first-child {
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+  border-inline-end: none;
+}
+
+.btn-split > .btn:last-child {
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+  padding: 0 var(--spacing-2);
+  min-width: auto;
+}
+
+/* Visual divider - using box-shadow instead of pseudo-element to avoid conflict */
+.btn-split > .btn:last-child {
+  box-shadow: inset 1px 0 0 0 rgb(255 255 255 / var(--split-divider-opacity));
+}
+
+/* ========================================================================
+ * DROPDOWN BUTTON
+ * ========================================================================
+ * Button that triggers a dropdown menu.
+ * Supports full keyboard navigation.
+ * ======================================================================== */
+
+.btn-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.btn-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+/* Dropdown caret indicator */
+.btn-dropdown__caret {
+  width: 0;
+  height: 0;
+  border-inline-start: 4px solid transparent;
+  border-inline-end: 4px solid transparent;
+  border-top: 5px solid currentColor;
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.btn-dropdown[aria-expanded="true"] .btn-dropdown__caret,
+.btn-dropdown__trigger[aria-expanded="true"] .btn-dropdown__caret {
+  transform: rotate(180deg);
+}
+
+/* Dropdown menu container */
+.btn-dropdown__menu {
+  position: absolute;
+  top: calc(100% + var(--spacing-1));
+  inset-inline-start: 0;
+  min-width: 100%;
+  max-width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--color-neutral-0);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: var(--z-index-dropdown);
+  
+  /* Hidden by default */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  
+  /* Smooth reveal animation */
+  transition: 
+    opacity var(--transition-fast),
+    visibility var(--transition-fast),
+    transform var(--transition-fast);
+  
+  /* Performance: contain layout to prevent reflows affecting other elements */
+  contain: layout style paint;
+}
+
+/* Show menu when expanded */
+.btn-dropdown[aria-expanded="true"] > .btn-dropdown__menu,
+.btn-dropdown__trigger[aria-expanded="true"] + .btn-dropdown__menu,
+.btn-dropdown:has(.btn-dropdown__trigger[aria-expanded="true"]) .btn-dropdown__menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* RTL-aware positioning when menu overflows viewport */
+.btn-dropdown__menu[data-position="end"] {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.btn-dropdown__menu[data-position="top"] {
+  top: auto;
+  bottom: calc(100% + var(--spacing-1));
+}
+
+/* Dropdown menu items */
+.btn-dropdown__item {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-4);
+  text-align: start;
+  background: none;
+  border: none;
+  color: var(--color-neutral-700);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn-dropdown__item:first-child {
+  border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
+}
+
+.btn-dropdown__item:last-child {
+  border-radius: 0 0 calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px);
+}
+
+@media (hover: hover) {
+  .btn-dropdown__item:hover {
+    background-color: var(--color-neutral-100);
+  }
+}
+
+.btn-dropdown__item:focus-visible {
+  outline: none;
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+/* Dropdown divider */
+.btn-dropdown__divider {
+  height: 1px;
+  margin: var(--spacing-1) 0;
+  background-color: var(--color-neutral-200);
+}
+
+/* ========================================================================
+ * EXPAND/COLLAPSE BUTTON
+ * ========================================================================
+ * Button that toggles content visibility.
+ * Icon rotates to indicate state.
+ * ======================================================================== */
+
+.btn-expand__icon {
+  transition: transform var(--transition-normal);
+}
+
+.btn-expand[aria-expanded="true"] .btn-expand__icon {
+  transform: rotate(180deg);
+}
+
+/* ========================================================================
+ * BADGE BUTTON
+ * ========================================================================
+ * Button with a notification badge/counter.
+ * Badge is positioned in top-right corner.
+ * ======================================================================== */
+
+.btn-badge {
+  position: relative;
+}
+
+.btn-badge__count {
+  position: absolute;
+  top: -4px;
+  inset-inline-end: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--spacing-1);
+  background-color: var(--color-danger-500);
+  color: var(--color-neutral-0);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  line-height: 18px;
+  text-align: center;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--color-neutral-0);
+  pointer-events: none; /* Badge shouldn't intercept clicks */
+}
+
+/* ========================================================================
+ * HIGH CONTRAST BUTTON
+ * ========================================================================
+ * Maximum contrast for accessibility needs.
+ * Meets WCAG AAA contrast requirements.
+ * ======================================================================== */
+
+.btn.btn--high-contrast {
+  background-color: var(--color-neutral-900);
+  color: var(--color-neutral-0);
+  border: 2px solid var(--color-neutral-900);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (hover: hover) {
+  .btn.btn--high-contrast:hover:not(:disabled):not(.btn--loading) {
+    background-color: var(--color-neutral-950);
+    border-color: var(--color-neutral-950);
+  }
+}
+
+.btn.btn--high-contrast:focus-visible {
+  outline: var(--focus-ring-width-thick) solid var(--color-neutral-0);
+  outline-offset: var(--focus-ring-offset);
+  box-shadow: 0 0 0 6px var(--color-neutral-900);
+}
+
+/* Inverse high contrast - light on dark backgrounds */
+.btn.btn--high-contrast-inverse {
+  background-color: var(--color-neutral-0);
+  color: var(--color-neutral-900);
+  border: 2px solid var(--color-neutral-900);
+  font-weight: var(--font-weight-bold);
+}
+
+@media (hover: hover) {
+  .btn.btn--high-contrast-inverse:hover:not(:disabled):not(.btn--loading) {
+    background-color: var(--color-neutral-100);
+  }
+}
+
+/* ========================================================================
+ * FULL WIDTH BUTTON
+ * ========================================================================
+ * Button that spans full container width.
+ * Useful for mobile layouts and forms.
+ * ======================================================================== */
+
+.btn.btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* ========================================================================
+ * CTA BUTTON
+ * ========================================================================
+ * Call-to-action with enhanced visual emphasis.
+ * Larger size, bolder styling, subtle shadow.
+ * ======================================================================== */
+
+.btn.btn--cta {
+  --_btn-bg: var(--color-primary-500);
+  --_btn-bg-hover: var(--color-primary-600);
+  --_btn-bg-active: var(--color-primary-700);
+  --_btn-text: var(--color-neutral-0);
+  
+  padding: var(--spacing-4) var(--spacing-8);
+  height: auto;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  box-shadow: var(--shadow-md);
+}
+
+@media (hover: hover) {
+  .btn.btn--cta:hover:not(:disabled):not(.btn--loading) {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-1px);
+  }
+}
+
+.btn.btn--cta:active:not(:disabled):not(.btn--loading) {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(0);
+}
+
+/* ========================================================================
+ * FORM ACTION BUTTONS
+ * ========================================================================
+ * Specialized styles for form submit/reset buttons.
+ * ======================================================================== */
+
+/* Submit button - Primary action styling */
+.btn.btn--submit {
+  --_btn-bg: var(--color-primary-500);
+  --_btn-bg-hover: var(--color-primary-600);
+  --_btn-bg-active: var(--color-primary-700);
+  --_btn-text: var(--color-neutral-0);
+}
+
+/* Reset button - Subtle, less prominent */
+.btn.btn--reset {
+  --_btn-bg: transparent;
+  --_btn-bg-hover: var(--color-neutral-100);
+  --_btn-bg-active: var(--color-neutral-200);
+  --_btn-text: var(--color-neutral-600);
+  --_btn-border: var(--color-neutral-300);
+}
+
+/* ========================================================================
+ * NAVIGATION BUTTONS
+ * ========================================================================
+ * Buttons styled for navigation purposes.
+ * Supports aria-current for active page indication.
+ * ======================================================================== */
+
+.btn.btn--nav {
+  background-color: transparent;
+  border: none;
+  color: var(--color-neutral-600);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius-md);
+}
+
+@media (hover: hover) {
+  .btn.btn--nav:hover:not(:disabled) {
+    background-color: var(--color-neutral-100);
+    color: var(--color-neutral-900);
+  }
+}
+
+.btn.btn--nav[aria-current="page"],
+.btn.btn--nav.btn--nav-active {
+  background-color: var(--color-primary-50);
+  color: var(--color-primary-700);
+}
+
+/* ========================================================================
+ * RESPONSIVE ADJUSTMENTS
+ * ========================================================================
+ * Ensure touch-friendly sizing on mobile devices.
+ * Enforces minimum touch targets per WCAG guidelines.
+ * ======================================================================== */
+
+@media (max-width: 640px) {
+  /* Increase minimum touch target on mobile */
+  .btn {
+    min-height: var(--btn-min-touch-target);
+  }
+  
+  /* Small buttons get slightly larger on mobile */
+  .btn.btn--sm {
+    min-height: 36px;
+  }
+}
+
+/* ========================================================================
+ * ZOOM LEVEL SUPPORT
+ * ========================================================================
+ * Ensure buttons remain usable at high zoom levels.
+ * ======================================================================== */
+
+@media (min-resolution: 2dppx) {
+  .btn {
+    /* Slightly thicker borders on high-DPI displays */
+    border-width: 0.5px;
+  }
+  
+  .btn.btn--high-contrast,
+  .btn.btn--high-contrast-inverse {
+    border-width: 2px;
+  }
+}
+
+/* ========================================================================
+ * PRINT STYLES
+ * ========================================================================
+ * Optimize button appearance for print.
+ * Removes shadows, animations, and loading states.
+ * ======================================================================== */
+
+@media print {
+  .btn {
+    box-shadow: none !important;
+    border: 1px solid currentColor !important;
+    background: transparent !important;
+    color: inherit !important;
+  }
+  
+  .btn.btn--loading::after {
+    display: none;
+  }
+  
+  /* Hide dropdown menus in print */
+  .btn-dropdown__menu {
+    display: none !important;
+  }
+  
+  /* Hide badges in print */
+  .btn-badge__count {
+    display: none;
+  }
+}
